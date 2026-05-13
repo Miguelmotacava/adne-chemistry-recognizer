@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset generado (4.4 GB — se regenera con data/generate_dataset.py)
+data/raw/*/
+!data/raw/.gitkeep
+data/metadata.csv
+
+# PyTorch / artefactos pesados — por defecto excluimos todos los .pt
+*.pt
+*.pth
+*.onnx
+# ...pero conservamos los modelos clave que el repositorio necesita
+# (best_model.pt es el que carga la demo del notebook 06; chemcnn_best.pt
+# y cvae_best.pt son los baselines de los notebooks 03 y 04b).
+!saved_models/best_model.pt
+!saved_models/chemcnn_best.pt
+!saved_models/cvae_best.pt
+
+# Figuras temporales del script de re-evaluación
+saved_models/figs_04b/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs y temporales
+*.log
+tmp/
+temp/
+
+# Secretos
+.env.local
+*.key
+api_keys.txt

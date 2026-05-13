@@ -1,0 +1,32 @@
+name: chem-adne
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.10.12
+  - pip=23.3
+  - conda-forge::rdkit=2023.09.4
+  - pytorch::pytorch=2.1.0
+  - pytorch::torchvision=0.16.0
+  - pytorch::cpuonly
+  - numpy=1.26.0
+  - pandas=2.1.1
+  - matplotlib=3.8.0
+  - seaborn=0.13.0
+  - scikit-learn=1.3.2
+  - scikit-image=0.22.0
+  - opencv=4.8.1
+  - pillow=10.1.0
+  - scipy=1.11.3
+  - tqdm=4.66.1
+  - ipywidgets=8.1.1
+  - notebook=7.0.6
+  - jupyter=1.0.0
+  - pip:
+    - albumentations==1.3.1
+    - ipycanvas==0.13.1
+    - decimer==2.2.0
+    - anthropic==0.25.0
+    - papermill==2.5.0
+    - umap-learn==0.5.4
