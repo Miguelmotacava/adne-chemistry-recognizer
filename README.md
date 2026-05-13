@@ -121,6 +121,36 @@ Con el dataset completo (300 imágenes/clase, 58.800 imágenes, 196 clases) y el
 
 El modelo ganador (ResNet18 fine-tuned) está serializado en [`saved_models/best_model.pt`](saved_models/best_model.pt) + [`saved_models/best_model_config.json`](saved_models/best_model_config.json) y es el que carga el notebook 06 para la demo interactiva.
 
+## Limitaciones de la demo interactiva
+
+La demo del notebook 06 está pensada para ilustrar el modelo en una experiencia de uso real, pero al probarla aparece la limitación que ya advertíamos en el caveat: **el modelo identifica con fiabilidad las estructuras 2D pero falla con los compuestos renderizados como texto-fórmula**. Conviene tenerlo presente al defender el trabajo, porque es la diferencia entre un 99,5% de accuracy en test y la experiencia que tiene un alumno dibujando en el canvas.
+
+### Por qué pasa
+
+El dataset tiene dos modos de render:
+
+- **Estructuras 2D** (RDKit): líneas, anillos, dobles enlaces. La red aprende a reconocer rasgos geométricos invariantes (un hexágono aromático, un grupo carbonilo, etc.), que son robustos al estilo del dibujante. La demo funciona bien aquí.
+- **Texto-fórmula** (PIL + fuente DejaVuSansMono-Bold): se usa para compuestos iónicos (sales, hidróxidos, hidrácidos, oxisales) y para los compuestos en los que RDKit no parsea el SMILES. La red termina aprendiendo a *leer una fuente concreta*, no a hacer OCR sobre escritura manuscrita. Cuando un alumno dibuja "NaCl" a mano, la red ve algo completamente fuera de su distribución de entrenamiento.
+
+### Qué subcategorías van bien en la demo y cuáles no
+
+| Categoría | Subcategorías que funcionan (estructura 2D) | Subcategorías problemáticas (texto-fórmula) |
+|---|---|---|
+| Inorgánica | óxidos metálicos, anhídridos, peróxidos, hidruros metálicos, hidruros volátiles, oxoácidos | hidrácidos, sales neutras, sales volátiles, hidróxidos, oxisales |
+| Orgánica | **todas** (siempre estructuras 2D) | — |
+
+Para una sesión de demo realista, recomendamos filtrar a *Orgánica* o a las subcategorías inorgánicas de la columna izquierda. El propio notebook muestra un aviso visible si el compuesto actual es de los iónicos.
+
+### Cómo se arreglaría de raíz
+
+Tres caminos, en orden de coste creciente:
+
+1. **Aumentar el dataset con texto manuscrito**. Generar las fórmulas con múltiples fuentes y aplicar augmentaciones tipo "wave warp" + grosor variable para imitar escritura humana. Idealmente combinarlo con un dataset auxiliar como EMNIST para que la red aprenda invariantes de glifos manuscritos.
+2. **Pipeline de dos etapas para compuestos iónicos**. Detectar primero los caracteres con un OCR (Tesseract o un transformer pequeño), reconstruir la fórmula y mapearla al `compound_id`. Es lo que hacen los OCSR comerciales.
+3. **Modelo multimodal con LLM**. Pasarle al modelo (Claude, GPT-4o) la imagen + la lista de compuestos válidos y dejar que él decida. Funciona pero rompe el requisito de offline + coste cero por inferencia.
+
+Todo eso queda fuera del alcance de la práctica.
+
 ## Orden de ejecución de los notebooks
 
 1. **`00_dataset_generation`** — UI para lanzar el generador y verificar que las imágenes generadas tienen sentido.
