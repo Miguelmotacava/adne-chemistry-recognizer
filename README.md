@@ -93,17 +93,31 @@ chemistry-recognizer/
 
 ## Resultados
 
-Con el dataset completo (300 imágenes/clase, 58.800 imágenes, 196 clases) y el pipeline ejecutado de extremo a extremo en una GPU RTX 4060:
+Con el dataset completo (300 imágenes/clase, 58.800 imágenes, 196 clases) y el pipeline ejecutado de extremo a extremo en una GPU RTX 4060.
 
-| Notebook | Modelo | Métrica | Resultado |
-|---|---|---|---|
-| 02 | SVM-linear + embeddings ResNet18 | test accuracy | 69,0% |
-| 02 | SVM-linear + embeddings ResNet18 | test F1 macro | 0,683 |
-| 03 | ChemCNN (4 bloques, Exp2) | best val acc | 98,2% |
-| **04** | **ResNet18 fine-tune** | **test accuracy** | **99,4%** |
-| **04** | **ResNet18 fine-tune** | **test F1 macro** | **0,994** |
-| 04 | EfficientNet-B0 fine-tune | best val acc | 98,9% |
-| 04b | Conditional VAE | best val loss | 156,4 (ELBO neg.) |
+### Métricas comparadas (train / val / test) y diagnóstico de sobreaprendizaje
+
+| Notebook | Modelo | Train acc | Val acc | Test acc | Gap train-val | Sobreaprendizaje |
+|---|---|---:|---:|---:|---:|:---:|
+| 02 | SVM-lin + píxeles | 20,6% (CV) | — | — | — | no medido |
+| 02 | SVM-lin + HOG | 46,8% (CV) | — | — | — | no medido |
+| 02 | **SVM-lin + ResNet18-embed** | 62,8% (CV) | — | **69,0%** | — | no |
+| 03 | ChemCNN Exp1 (2 bloques) | 43,5% | 47,8% | — | -4,3% | subajuste |
+| 03 | **ChemCNN Exp2 (4 bloques)** | **98,4%** | **98,2%** | — | **+0,2%** | **no** |
+| 03 | ChemCNN Exp3 (+dropout) | 93,3% | 97,2% | — | -3,9% | no |
+| 03 | ChemCNN Exp4 (+aug) | 79,2% | 96,0% | — | -16,8% | no (aug solo en train) |
+| 03 | ChemCNN Exp5 (LR=1e-4) | 65,8% † | 66,3% † | 66,1% † | -0,5% † | subajuste, no overfit |
+| 04 | ResNet18 feat-extraction | 72,5% | 82,7% | — | -10,2% | no |
+| 04 | **ResNet18 fine-tune** | **99,5% †** | **99,7% †** | **99,6% †** | **-0,2% †** | **no** |
+| 04 | EfficientNet-B0 feat-extraction | 69,5% | 81,5% | — | -12,0% | no |
+| 04 | EfficientNet-B0 fine-tune | 96,7% | 98,9% | — | -2,2% | no |
+| 04b | Conditional VAE (loss) | 156,4 | 156,4 | — | 0,0 | no |
+
+† Estos valores corresponden a una evaluación adicional con `VAL_TRANSFORM` (sin augmentation, sin sampler) sobre los modelos guardados, hecha para descartar overfitting de forma estricta. El resto son los valores reportados al final del entrenamiento. El gap negativo (val > train) es esperado en los experimentos con augmentation activa: las imágenes que ve la red en entrenamiento son sistemáticamente más difíciles que las de validación.
+
+**Conclusión sobre sobreaprendizaje:** en ningún modelo entrenado vemos overfitting clásico. Los modelos con buena performance (Exp2 del notebook 03 y ResNet18 fine-tune del notebook 04) tienen train ≈ val ≈ test, con diferencias dentro del margen de ruido estadístico. Los modelos con peor performance (Exp1, Exp5, feature-extraction) lo son por **subajuste**, no por overfitting.
+
+**Caveat importante.** El 99,5% de accuracy del modelo ganador mide *robustez a las augmentaciones de `Albumentations` sobre el render de RDKit*, no la accuracy que la demo del notebook 06 obtendría sobre dibujos a mano reales. Esa última métrica no la hemos medido — requiere un set de test manual fuera del alcance de la práctica.
 
 El modelo ganador (ResNet18 fine-tuned) está serializado en [`saved_models/best_model.pt`](saved_models/best_model.pt) + [`saved_models/best_model_config.json`](saved_models/best_model_config.json) y es el que carga el notebook 06 para la demo interactiva.
 
@@ -115,7 +129,7 @@ El modelo ganador (ResNet18 fine-tuned) está serializado en [`saved_models/best
 4. **`03_CNN_scratch`** — CNN desde cero (`ChemCNN`) con 5 experimentos progresivos para ver cómo afecta cada decisión (profundidad, dropout, augmentación, learning rate scheduler).
 5. **`04_transfer_learning`** — comparativa de 4 configuraciones: ResNet18 y EfficientNet-B0, cada una en modo *feature extraction* y *fine-tuning*. El ganador se guarda en `saved_models/best_model.pt` para los notebooks 05 y 06.
 6. **`04b_generative`** — Conditional VAE. La parte generativa del pipeline. Reconstrucción, generación condicional por clase e interpolación en el espacio latente.
-7. **`05_market_comparison`** — comparativa contra DECIMER (OCSR open source) y Claude Sonnet (LLM con visión). Discusión sobre accuracy, latencia, coste y despliegue offline.
+7. **`05_market_comparison`** — comparativa contra DECIMER (OCSR open source) y, opcionalmente, Claude Sonnet (LLM con visión). En nuestra corrida sólo medimos las dos primeras filas + DECIMER porque no teníamos crédito disponible en la API de Anthropic; la fila del LLM se ejecuta automáticamente si se define `ANTHROPIC_API_KEY`. Discusión sobre accuracy, latencia, coste y despliegue offline.
 8. **`06_interactive_demo`** — la aplicación final para el alumno: canvas para dibujar, inferencia con el `best_model.pt`, marcador por subcategoría.
 
 ## Variables de entorno opcionales

@@ -35,9 +35,6 @@ data/metadata.csv
 !saved_models/chemcnn_best.pt
 !saved_models/cvae_best.pt
 
-# Figuras temporales del script de re-evaluación
-saved_models/figs_04b/
-
 # IDE
 .vscode/
 .idea/
