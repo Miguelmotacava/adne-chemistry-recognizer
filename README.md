@@ -19,7 +19,14 @@ Hay tres formas de usar el clasificador, según cuánto quieras instalar. Ordena
 Abres el enlace en cualquier navegador y la app está lista. La hemos desplegado en HF Spaces porque su free tier (16 GB de RAM, CPU básico) sí soporta cargar PyTorch + RDKit + el modelo de ~45 MB. Construida con **Gradio**, dos pestañas:
 
 - **Dibujar**: eliges un compuesto del catálogo, ves al lado el render canónico de RDKit, lo replicas en un canvas y el modelo clasifica tu dibujo con top-5 de confianzas. Hay filtros por categoría inorgánica/orgánica, subcategoría y dificultad, además de botones *Anterior / Siguiente / Aleatorio*.
+
+<img width="1247" height="658" alt="image" src="https://github.com/user-attachments/assets/9aa74d18-6857-453e-a969-70ea87c7b963" />
+
+
 - **Ver al modelo trabajar (modo dataset)**: pulsas *Generar imagen aleatoria* y el modelo clasifica un render de RDKit que él mismo no vio en entrenamiento. Aquí la accuracy real ronda el 99%.
+
+<img width="1273" height="663" alt="image" src="https://github.com/user-attachments/assets/46eb0a8d-f98a-4fe9-af14-81e29bf3793b" />
+
 
 El código del Space está empaquetado en [`deployment/huggingface_space/`](deployment/huggingface_space/) y la guía paso a paso para reproducirlo en otra cuenta está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md).
 
@@ -39,7 +46,8 @@ Así se vería la interfaz:
 - modo paraprobar el modelo:
 <img width="1230" height="648" alt="image" src="https://github.com/user-attachments/assets/4abd80ed-8d23-42ae-9324-2ced2cc79caa" />
 
--modo examen (no funciona correctamente en lo que a predicciones se refiere):
+
+- modo examen (no funciona correctamente en lo que a predicciones se refiere):
 <img width="1228" height="653" alt="image" src="https://github.com/user-attachments/assets/8f112db4-4b4c-47a0-b8ea-715a37434b05" />
 
 
