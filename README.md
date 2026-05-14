@@ -35,6 +35,15 @@ streamlit run streamlit_app.py
 
 Streamlit abre la app en **http://localhost:8501** y se abre el navegador automáticamente. El `requirements.txt` del repo está pinned mínimo (sin Jupyter, sin DECIMER, sin papermill) para que pese poco — exactamente lo que necesita esta app.
 
+Así se vería la interfaz:
+- modo paraprobar el modelo:
+<img width="1230" height="648" alt="image" src="https://github.com/user-attachments/assets/4abd80ed-8d23-42ae-9324-2ced2cc79caa" />
+
+-modo examen (no funciona correctamente en lo que a predicciones se refiere):
+<img width="1228" height="653" alt="image" src="https://github.com/user-attachments/assets/8f112db4-4b4c-47a0-b8ea-715a37434b05" />
+
+
+
 > **Aviso sobre Streamlit Cloud:** lo intentamos primero (es lo más cómodo a priori porque hace deploy directo del repo de GitHub), pero su free tier (1 GB RAM, 1 GB disco) **no aguanta PyTorch + RDKit + el modelo**: el build acababa con `ModuleNotFoundError: torch`. Esa es la razón por la que decidimos saltar a HF Spaces.
 
 ### 📓 3. En local con el notebook interactivo
