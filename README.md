@@ -274,6 +274,10 @@ python -m pytest tests/ -v
 - [Albumentations](https://albumentations.ai/) — pipeline de aumentación.
 - [formulacionquimica.com](https://www.formulacionquimica.com/) — referencia para nomenclatura tradicional e IUPAC.
 
-## Autor
+## Autores
 
-Miguel Mota Cava — ICAI, Universidad Pontificia Comillas, 2025-2026.
+Trabajo realizado por el siguiente grupo del Máster en Big Data, ICAI – Universidad Pontificia Comillas, curso 2025-2026:
+
+- Miguel Mota Cava
+- Pedro Rodríguez
+- Juan Miguel Correa
