@@ -8,65 +8,6 @@ El objetivo es construir, desde cero, un clasificador capaz de identificar compu
 
 El catálogo contiene unos 200 compuestos divididos en Química Inorgánica (óxidos, anhídridos, peróxidos, hidruros, sales, hidróxidos, oxoácidos, oxisales) y Química Orgánica (alcanos, alquenos, alquinos, cicloalcanos, aromáticos, halogenuros, alcoholes, éteres, aldehídos, cetonas, ácidos carboxílicos, ésteres, anhídridos, aminas, amidas, nitrilos).
 
-## Cómo probar la app
-
-Hay tres formas de usar el clasificador, según cuánto quieras instalar. Ordenadas de menos a más esfuerzo:
-
-### 🌐 1. Online en Hugging Face Spaces (sin instalar nada)
-
-> **URL pública:** https://huggingface.co/spaces/mmmiguellll/adne-chemistry-recognizer
-
-Abres el enlace en cualquier navegador y la app está lista. La hemos desplegado en HF Spaces porque su free tier (16 GB de RAM, CPU básico) sí soporta cargar PyTorch + RDKit + el modelo de ~45 MB. Construida con **Gradio**, dos pestañas:
-
-- **Dibujar**: eliges un compuesto del catálogo, ves al lado el render canónico de RDKit, lo replicas en un canvas y el modelo clasifica tu dibujo con top-5 de confianzas. Hay filtros por categoría inorgánica/orgánica, subcategoría y dificultad, además de botones *Anterior / Siguiente / Aleatorio*.
-
-<img width="1247" height="658" alt="image" src="https://github.com/user-attachments/assets/9aa74d18-6857-453e-a969-70ea87c7b963" />
-
-
-- **Ver al modelo trabajar (modo dataset)**: pulsas *Generar imagen aleatoria* y el modelo clasifica un render de RDKit que él mismo no vio en entrenamiento. Aquí la accuracy real ronda el 99%.
-
-<img width="1273" height="663" alt="image" src="https://github.com/user-attachments/assets/46eb0a8d-f98a-4fe9-af14-81e29bf3793b" />
-
-
-El código del Space está empaquetado en [`deployment/huggingface_space/`](deployment/huggingface_space/) y la guía paso a paso para reproducirlo en otra cuenta está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md).
-
-### 💻 2. En local con Streamlit
-
-Versión Streamlit equivalente a la de HF Spaces, ejecutable en tu máquina. Se hace en tres líneas:
-
-```bash
-pip install -r requirements.txt
-pip install -e .
-streamlit run streamlit_app.py
-```
-
-Streamlit abre la app en **http://localhost:8501** y se abre el navegador automáticamente. El `requirements.txt` del repo está pinned mínimo (sin Jupyter, sin DECIMER, sin papermill) para que pese poco — exactamente lo que necesita esta app.
-
-Así se vería la interfaz:
-- modo paraprobar el modelo:
-<img width="1230" height="648" alt="image" src="https://github.com/user-attachments/assets/4abd80ed-8d23-42ae-9324-2ced2cc79caa" />
-
-
-- modo examen (no funciona correctamente en lo que a predicciones se refiere):
-<img width="1228" height="653" alt="image" src="https://github.com/user-attachments/assets/8f112db4-4b4c-47a0-b8ea-715a37434b05" />
-
-
-
-> **Aviso sobre Streamlit Cloud:** lo intentamos primero (es lo más cómodo a priori porque hace deploy directo del repo de GitHub), pero su free tier (1 GB RAM, 1 GB disco) **no aguanta PyTorch + RDKit + el modelo**: el build acababa con `ModuleNotFoundError: torch`. Esa es la razón por la que decidimos saltar a HF Spaces.
-
-### 📓 3. En local con el notebook interactivo
-
-Para quien quiera trabajar con todo el pipeline (no sólo la demo), el [notebook 06](notebooks/06_interactive_demo.ipynb) replica la misma interfaz que la app de Streamlit/Gradio, pero dentro de Jupyter con `ipywidgets` + `ipycanvas`. Requiere las dependencias de desarrollo completas:
-
-```bash
-pip install -r requirements-dev.txt   # incluye Jupyter, DECIMER, papermill, etc.
-pip install -e .
-jupyter notebook
-# Abre notebooks/06_interactive_demo.ipynb y ejecuta todas las celdas
-```
-
-Esta vía es la que usamos para iterar durante el desarrollo y la que tiene también los notebooks 00-05 (generación, EDA, ML clásico, CNN, transfer learning, comparativa) si quieres ver el camino completo del proyecto.
-
 ## Requisitos
 
 - Windows 10/11, macOS 12+ o Ubuntu 20.04+
@@ -91,7 +32,7 @@ scripts\setup_env.bat
 # o si lo prefieres manual:
 conda env create -f environment.yml
 conda activate chem-adne
-pip install -e .
+pip install -e.
 ```
 
 El script de setup crea el entorno, instala el paquete `src/` en modo editable, habilita los widgets de Jupyter y genera un dataset de prueba de 5 imágenes/clase para verificar que todo funciona.
@@ -119,35 +60,35 @@ y abrir la carpeta `notebooks/` en el navegador.
 ```
 chemistry-recognizer/
 ├── data/
-│   ├── compounds.py          # catálogo + taxonomía (módulo standalone)
-│   ├── generate_dataset.py   # CLI para generar imágenes y metadata.csv
-│   ├── metadata.csv          # se crea al ejecutar lo anterior
-│   └── raw/                  # imágenes generadas
-├── src/                      # paquete instalable (pip install -e .)
-│   ├── augmentation.py       # pipelines de Albumentations
-│   ├── dataset.py            # ChemDataset + factory get_dataloaders
-│   ├── models.py             # ChemCNN + PretrainedModel
-│   ├── train.py              # bucle de entrenamiento (con AMP en GPU)
-│   ├── evaluate.py           # métricas, curvas, matriz de confusión
-│   └── vae.py                # Conditional VAE (notebook 04b)
+│ ├── compounds.py # catálogo + taxonomía (módulo standalone)
+│ ├── generate_dataset.py # CLI para generar imágenes y metadata.csv
+│ ├── metadata.csv # se crea al ejecutar lo anterior
+│ └── raw/ # imágenes generadas
+├── src/ # paquete instalable (pip install -e.)
+│ ├── augmentation.py # pipelines de Albumentations
+│ ├── dataset.py # ChemDataset + factory get_dataloaders
+│ ├── models.py # ChemCNN + PretrainedModel
+│ ├── train.py # bucle de entrenamiento (con AMP en GPU)
+│ ├── evaluate.py # métricas, curvas, matriz de confusión
+│ └── vae.py # Conditional VAE (notebook 04b)
 ├── notebooks/
-│   ├── 00_dataset_generation.ipynb
-│   ├── 01_EDA.ipynb
-│   ├── 02_classical_ML.ipynb
-│   ├── 03_CNN_scratch.ipynb
-│   ├── 04_transfer_learning.ipynb
-│   ├── 04b_generative.ipynb        # CVAE — parte generativa
-│   ├── 05_market_comparison.ipynb
-│   └── 06_interactive_demo.ipynb
+│ ├── 00_dataset_generation.ipynb
+│ ├── 01_EDA.ipynb
+│ ├── 02_classical_ML.ipynb
+│ ├── 03_CNN_scratch.ipynb
+│ ├── 04_transfer_learning.ipynb
+│ ├── 04b_generative.ipynb # CVAE — parte generativa
+│ ├── 05_market_comparison.ipynb
+│ └── 06_interactive_demo.ipynb
 ├── saved_models/
-│   ├── best_model.pt
-│   └── best_model_config.json
-├── tests/                    # pytest — compounds, models, dataset
-├── scripts/                  # setup_env, generate_full_dataset, run_all_notebooks
+│ ├── best_model.pt
+│ └── best_model_config.json
+├── tests/ # pytest — compounds, models, dataset
+├── scripts/ # setup_env, generate_full_dataset, run_all_notebooks
 ├── environment.yml
-├── requirements.txt          # deps minimas para la demo en Streamlit Cloud
-├── requirements-dev.txt      # deps completas para el desarrollo (notebooks)
-├── streamlit_app.py          # demo desplegable
+├── requirements.txt # deps minimas para la demo en Streamlit Cloud
+├── requirements-dev.txt # deps completas para el desarrollo (notebooks)
+├── streamlit_app.py # demo desplegable
 ├── setup.py
 └── Makefile
 ```
@@ -191,9 +132,9 @@ A continuación se muestran las figuras más representativas de cada notebook, e
 
 | | |
 |:---:|:---:|
-| ![Distribución general](docs/img/eda_overview.png) | ![Equilibrio de clases](docs/img/eda_class_balance.png) |
+|![Distribución general](docs/img/eda_overview.png) |![Equilibrio de clases](docs/img/eda_class_balance.png) |
 | Split train/val/test y reparto inorgánica/orgánica | Imágenes por clase y mediana (Gini ≈ 0) |
-| ![Galería visual](docs/img/eda_visual_grid.png) | ![PCA + t-SNE](docs/img/eda_pca_tsne.png) |
+|![Galería visual](docs/img/eda_visual_grid.png) |![PCA + t-SNE](docs/img/eda_pca_tsne.png) |
 | 20 compuestos aleatorios — se ven los dos modos de render | t-SNE separa por modo de render, no por categoría |
 
 **Notebook 03 — CNN desde cero (mejor experimento)**
@@ -220,9 +161,9 @@ F1-score por clase ordenado: el grueso de clases supera el 0,99.
 
 | | |
 |:---:|:---:|
-| ![Curvas VAE](docs/img/vae_curves.png) | ![Reconstrucciones](docs/img/vae_recon.png) |
+|![Curvas VAE](docs/img/vae_curves.png) |![Reconstrucciones](docs/img/vae_recon.png) |
 | Loss total + descomposición reconstrucción/KL | Original (arriba) vs reconstrucción (abajo) |
-| ![Generación condicional](docs/img/vae_generation.png) | ![Interpolación latente](docs/img/vae_interpolation.png) |
+|![Generación condicional](docs/img/vae_generation.png) |![Interpolación latente](docs/img/vae_interpolation.png) |
 | 8 muestras nuevas por compuesto | Interpolación lineal entre dos compuestos |
 
 ![Espacio latente](docs/img/vae_latent_pca.png)
@@ -315,35 +256,64 @@ Si no está definida, el notebook 05 omite la fila del LLM sin fallar.
 - **Dataset en disco vs. on-the-fly**: hemos optado por escribir las variantes aumentadas a disco. Es menos elegante pero ahorra ~30% de tiempo por época (la augmentación con `ElasticTransform` no es gratis).
 - **`WeightedRandomSampler`** activado por defecto en `get_dataloaders()`. Con el dataset balanceado actual es redundante, pero queda como red de seguridad si en el futuro alguien filtra por subcategoría o dificultad.
 
-## Demo desplegada en la nube
+## Cómo probar la app
 
-La demo del notebook 06 está disponible como aplicación web standalone en `streamlit_app.py` (en la raíz del repo). Se puede desplegar gratis en Streamlit Cloud o en Hugging Face Spaces siguiendo estos pasos:
+Hay tres formas de usar el clasificador, según cuánto quieras instalar. Ordenadas de menos a más esfuerzo:
 
-### Streamlit Cloud (lo más sencillo)
+### 1. Online en Hugging Face Spaces (sin instalar nada)
 
-1. Crear cuenta en [share.streamlit.io](https://share.streamlit.io) (basta con login de GitHub).
-2. *New app* → seleccionar el repo `Miguelmotacava/adne-chemistry-recognizer`, branch `main`, main file `streamlit_app.py`.
-3. *Deploy*. En unos 3–5 minutos la app está online en una URL pública del tipo `https://adne-chemistry-recognizer.streamlit.app`.
+> **URL pública:** https://huggingface.co/spaces/mmmiguellll/adne-chemistry-recognizer
 
-Streamlit Cloud usa por defecto `requirements.txt` (que ya viene preparado con las dependencias mínimas — sin Jupyter, sin DECIMER/TensorFlow). El despliegue tarda menos de cinco minutos.
+Abres el enlace en cualquier navegador y la app está lista. La hemos desplegado en HF Spaces porque su free tier (16 GB de RAM, CPU básico) sí soporta cargar PyTorch + RDKit + el modelo de ~45 MB. Construida con **Gradio**, dos pestañas:
 
-### Hugging Face Spaces (alternativa, idéntico de fácil)
+- **Dibujar**: eliges un compuesto del catálogo, ves al lado el render canónico de RDKit, lo replicas en un canvas y el modelo clasifica tu dibujo con top-5 de confianzas. Hay filtros por categoría inorgánica/orgánica, subcategoría y dificultad, además de botones *Anterior / Siguiente / Aleatorio*.
 
-1. Crear cuenta en [huggingface.co](https://huggingface.co).
-2. *New Space* → SDK: **Streamlit**.
-3. Clonar el space recién creado, copiar `streamlit_app.py`, `requirements.txt`, `src/`, `data/compounds.py`, `data/generate_dataset.py` y `saved_models/`. Push.
+<img width="1247" height="658" alt="image" src="https://github.com/user-attachments/assets/9aa74d18-6857-453e-a969-70ea87c7b963" />
 
-### Probar la demo en local
+
+- **Ver al modelo trabajar (modo dataset)**: pulsas *Generar imagen aleatoria* y el modelo clasifica un render de RDKit que él mismo no vio en entrenamiento. Aquí la accuracy real ronda el 99%.
+
+<img width="1273" height="663" alt="image" src="https://github.com/user-attachments/assets/46eb0a8d-f98a-4fe9-af14-81e29bf3793b" />
+
+
+El código del Space está empaquetado en [`deployment/huggingface_space/`](deployment/huggingface_space/) y la guía paso a paso para reproducirlo en otra cuenta está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md).
+
+### 2. En local con Streamlit
+
+Versión Streamlit equivalente a la de HF Spaces, ejecutable en tu máquina. Se hace en tres líneas:
 
 ```bash
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
+pip install -e.
 streamlit run streamlit_app.py
 ```
 
-Abre en el navegador `http://localhost:8501`. La app tiene dos pestañas:
+Streamlit abre la app en **http://localhost:8501** y se abre el navegador automáticamente. El `requirements.txt` del repo está pinned mínimo (sin Jupyter, sin DECIMER, sin papermill) para que pese poco — exactamente lo que necesita esta app.
 
-- **Test del modelo (RDKit)**: elige un compuesto y mira cómo lo clasifica. Aquí la accuracy es la real del modelo (~99%).
-- **Dibujar a mano**: lienzo para dibujar el compuesto + render de referencia al lado. Como advertimos en la sección de limitaciones, la accuracy aquí es notablemente inferior.
+Así se vería la interfaz:
+- modo paraprobar el modelo:
+<img width="1230" height="648" alt="image" src="https://github.com/user-attachments/assets/4abd80ed-8d23-42ae-9324-2ced2cc79caa" />
+
+
+- modo examen (no funciona correctamente en lo que a predicciones se refiere):
+<img width="1228" height="653" alt="image" src="https://github.com/user-attachments/assets/8f112db4-4b4c-47a0-b8ea-715a37434b05" />
+
+
+
+> **Aviso sobre Streamlit Cloud:** lo intentamos primero (es lo más cómodo a priori porque hace deploy directo del repo de GitHub), pero su free tier (1 GB RAM, 1 GB disco) **no aguanta PyTorch + RDKit + el modelo**: el build acababa con `ModuleNotFoundError: torch`. Esa es la razón por la que decidimos saltar a HF Spaces.
+
+### 3. En local con el notebook interactivo
+
+Para quien quiera trabajar con todo el pipeline (no sólo la demo), el [notebook 06](notebooks/06_interactive_demo.ipynb) replica la misma interfaz que la app de Streamlit/Gradio, pero dentro de Jupyter con `ipywidgets` + `ipycanvas`. Requiere las dependencias de desarrollo completas:
+
+```bash
+pip install -r requirements-dev.txt # incluye Jupyter, DECIMER, papermill, etc.
+pip install -e.
+jupyter notebook
+# Abre notebooks/06_interactive_demo.ipynb y ejecuta todas las celdas
+```
+
+Esta vía es la que usamos para iterar durante el desarrollo y la que tiene también los notebooks 00-05 (generación, EDA, ML clásico, CNN, transfer learning, comparativa) si quieres ver el camino completo del proyecto.
 
 ## Sin conda
 
@@ -352,7 +322,7 @@ Si no quieres instalar conda, para **desarrollar localmente** (notebooks incluid
 ```bash
 python -m pip install -r requirements-dev.txt
 # Y aparte:
-python -m pip install rdkit          # puede que no haya wheel para tu plataforma
+python -m pip install rdkit # puede que no haya wheel para tu plataforma
 ```
 
 En sistemas donde el wheel de `rdkit` para pip no funciona, no hay alternativa razonable: hay que usar conda.
@@ -382,4 +352,4 @@ Trabajo realizado por el siguiente grupo del Máster en Big Data, ICAI – Unive
 - Pedro Rodríguez
 - Juan Miguel Correa
 - Miguel Mota
-  
+
