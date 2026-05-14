@@ -112,6 +112,7 @@ Con el dataset completo (300 imágenes/clase, 58.800 imágenes, 196 clases) y el
 | 04 | EfficientNet-B0 feat-extraction | 69,5% | 81,5% | — | -12,0% | no |
 | 04 | EfficientNet-B0 fine-tune | 96,7% | 98,9% | — | -2,2% | no |
 | 04b | Conditional VAE (loss) | 156,4 | 156,4 | — | 0,0 | no |
+| Extra | **ResNet18 + handwritten-aug** | **99,02%** | **98,99%** | **98,90%** | **+0,03%** | **no** |
 
 † Estos valores corresponden a una evaluación adicional con `VAL_TRANSFORM` (sin augmentation, sin sampler) sobre los modelos guardados, hecha para descartar overfitting de forma estricta. El resto son los valores reportados al final del entrenamiento. El gap negativo (val > train) es esperado en los experimentos con augmentation activa: las imágenes que ve la red en entrenamiento son sistemáticamente más difíciles que las de validación.
 
@@ -120,6 +121,72 @@ Con el dataset completo (300 imágenes/clase, 58.800 imágenes, 196 clases) y el
 **Caveat importante.** El 99,5% de accuracy del modelo ganador mide *robustez a las augmentaciones de `Albumentations` sobre el render de RDKit*, no la accuracy que la demo del notebook 06 obtendría sobre dibujos a mano reales. Esa última métrica no la hemos medido — requiere un set de test manual fuera del alcance de la práctica.
 
 El modelo ganador (ResNet18 fine-tuned) está serializado en [`saved_models/best_model.pt`](saved_models/best_model.pt) + [`saved_models/best_model_config.json`](saved_models/best_model_config.json) y es el que carga el notebook 06 para la demo interactiva.
+
+### Galería de resultados
+
+A continuación se muestran las figuras más representativas de cada notebook, exportadas directamente de las ejecuciones del repositorio. Permiten una lectura rápida sin abrir Jupyter.
+
+**Notebook 01 — EDA**
+
+| | |
+|:---:|:---:|
+| ![Distribución general](docs/img/eda_overview.png) | ![Equilibrio de clases](docs/img/eda_class_balance.png) |
+| Split train/val/test y reparto inorgánica/orgánica | Imágenes por clase y mediana (Gini ≈ 0) |
+| ![Galería visual](docs/img/eda_visual_grid.png) | ![PCA + t-SNE](docs/img/eda_pca_tsne.png) |
+| 20 compuestos aleatorios — se ven los dos modos de render | t-SNE separa por modo de render, no por categoría |
+
+**Notebook 03 — CNN desde cero (mejor experimento)**
+
+![Curvas Exp2](docs/img/cnn_exp2_curves.png)
+
+Las dos curvas (train/val) suben juntas hasta el 98%. Ajuste casi perfecto sin overfitting.
+
+**Notebook 04 — Transfer learning**
+
+![Curvas de los 4 experimentos](docs/img/transfer_curves_03.png)
+
+Curva del ganador (ResNet18 fine-tune): supera el 99% de val_acc en sólo 6 épocas.
+
+![Matriz de confusión](docs/img/transfer_best_eval_00.png)
+
+Matriz de confusión del ResNet18 fine-tune: diagonal prácticamente al máximo en las 196 clases.
+
+![F1 por clase](docs/img/transfer_best_eval_01.png)
+
+F1-score por clase ordenado: el grueso de clases supera el 0,99.
+
+**Notebook 04b — Conditional VAE**
+
+| | |
+|:---:|:---:|
+| ![Curvas VAE](docs/img/vae_curves.png) | ![Reconstrucciones](docs/img/vae_recon.png) |
+| Loss total + descomposición reconstrucción/KL | Original (arriba) vs reconstrucción (abajo) |
+| ![Generación condicional](docs/img/vae_generation.png) | ![Interpolación latente](docs/img/vae_interpolation.png) |
+| 8 muestras nuevas por compuesto | Interpolación lineal entre dos compuestos |
+
+![Espacio latente](docs/img/vae_latent_pca.png)
+
+Proyección PCA 2D del espacio latente coloreado por categoría — los dos grupos se solapan considerablemente porque el CVAE no recibe la categoría como objetivo de aprendizaje.
+
+## Modelo extra: ResNet18 + augmentación agresiva (`HANDWRITTEN_TRAIN_TRANSFORM`)
+
+Al probar la demo del notebook 06 con dibujos a mano, observamos que el modelo del notebook 04 falla con bastante frecuencia. Es lo esperable —ver caveat más abajo— pero quisimos intentar mitigarlo entrenando una segunda variante con augmentación mucho más agresiva.
+
+**Receta** (definida en [`src/augmentation.py`](src/augmentation.py:HANDWRITTEN_TRAIN_TRANSFORM)):
+
+- `Affine` con rotación ±25°, escala 0,7–1,3, shear ±10° (p=0,95)
+- `ElasticTransform` con alpha=120, sigma=10 (p=0,7) — simula trazo tembloroso
+- `GridDistortion` con distort_limit=0,3 (p=0,5) — líneas ya no rectas
+- `OpticalDistortion` (p=0,4) — barril/cojín
+- `CoarseDropout` con 2–8 huecos (p=0,4) — trazos rotos
+- `GaussNoise` fuerte (p=0,7)
+- `RandomBrightnessContrast` ±0,2 (p=0,6)
+
+Se reentrena ResNet18 fine-tune con esta receta sobre las mismas 41k imágenes durante 8 épocas. El script es [`scripts/retrain_handwritten.py`](scripts/retrain_handwritten.py) y el modelo resultante queda en `saved_models/best_model_handwritten.pt`.
+
+**Resultados**: train 99,02% / val 98,99% / **test 98,90%**. Igual de bueno que el modelo del notebook 04 en el dominio del dataset (no perdemos accuracy en validación/test pese a augmentación mucho más agresiva), pero ahora la red ha visto durante el entrenamiento un rango mucho mayor de deformaciones, lo que la hace mejor candidata para reconocer dibujos hechos a mano. La demo del notebook 06 carga este modelo por defecto si está presente, con caída al modelo del 04 si no.
+
+> Aviso honesto: aún con esta augmentación, el rendimiento sobre dibujos hechos por un humano real sigue siendo notablemente inferior al 98,9% del dataset. El cambio de dominio mano-vs-RDKit no se cierra completamente con augmentación procedural; haría falta entrenamiento con datos manuscritos auténticos. Este modelo extra es **una mejora medible pero no un arreglo de raíz**.
 
 ## Limitaciones de la demo interactiva
 

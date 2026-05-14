@@ -32,6 +32,7 @@ data/metadata.csv
 # (best_model.pt es el que carga la demo del notebook 06; chemcnn_best.pt
 # y cvae_best.pt son los baselines de los notebooks 03 y 04b).
 !saved_models/best_model.pt
+!saved_models/best_model_handwritten.pt
 !saved_models/chemcnn_best.pt
 !saved_models/cvae_best.pt
 

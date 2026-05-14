@@ -8,7 +8,7 @@ Re-exports the most-used symbols so notebooks can do:
                      TRAIN_TRANSFORM, VAL_TRANSFORM)
 """
 
-from src.augmentation import TRAIN_TRANSFORM, VAL_TRANSFORM, AUGMENT_ONLY
+from src.augmentation import TRAIN_TRANSFORM, VAL_TRANSFORM, AUGMENT_ONLY, HANDWRITTEN_TRAIN_TRANSFORM
 from src.dataset import ChemDataset, get_dataloaders
 from src.models import ChemCNN, PretrainedModel
 from src.train import train_model, train_epoch, validate_epoch
@@ -23,7 +23,7 @@ from src.evaluate import (
 from src.vae import ConditionalVAE, vae_loss
 
 __all__ = [
-    "TRAIN_TRANSFORM", "VAL_TRANSFORM", "AUGMENT_ONLY",
+    "TRAIN_TRANSFORM", "VAL_TRANSFORM", "AUGMENT_ONLY", "HANDWRITTEN_TRAIN_TRANSFORM",
     "ChemDataset", "get_dataloaders",
     "ChemCNN", "PretrainedModel",
     "train_model", "train_epoch", "validate_epoch",

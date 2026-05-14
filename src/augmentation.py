@@ -72,3 +72,55 @@ AUGMENT_ONLY = A.Compose([
     _elastic(p=0.7, strong=True),
     A.RandomBrightnessContrast(brightness_limit=0.15, contrast_limit=0.15, p=0.6),
 ])
+
+
+# ---------------------------------------------------------------------------
+# HANDWRITTEN_TRAIN_TRANSFORM — augmentación agresiva para reentrenar el modelo
+# y que sea más robusto a dibujos a mano.
+#
+# La idea es someter las imágenes de RDKit a deformaciones del tipo que vería
+# en un dibujo humano: rotaciones grandes, escala variable, deformación
+# elástica fuerte, distorsión por rejilla (simula "lineas torcidas"),
+# distorsión óptica (simula trazos con curvatura), borrado aleatorio de
+# pequeños cuadrados (simula trazos rotos) y variabilidad de brillo/contraste.
+# ---------------------------------------------------------------------------
+
+def _heavy_affine(p):
+    if _A_V2:
+        return A.Affine(translate_percent=(-0.15, 0.15),
+                        scale=(0.7, 1.3),
+                        rotate=(-25, 25),
+                        shear=(-10, 10), p=p)
+    return A.ShiftScaleRotate(shift_limit=0.15, scale_limit=0.3,
+                              rotate_limit=25, p=p)
+
+
+def _heavy_elastic(p):
+    return A.ElasticTransform(alpha=120, sigma=10, p=p)
+
+
+def _coarse_dropout(p):
+    """Simula trazos rotos / huecos en el dibujo."""
+    try:
+        return A.CoarseDropout(num_holes_range=(2, 8),
+                               hole_height_range=(0.02, 0.08),
+                               hole_width_range=(0.02, 0.08),
+                               fill_value=255, p=p)
+    except TypeError:
+        # API antigua
+        return A.CoarseDropout(max_holes=8, max_height=18, max_width=18,
+                               min_holes=2, fill_value=255, p=p)
+
+
+HANDWRITTEN_TRAIN_TRANSFORM = A.Compose([
+    A.Resize(224, 224),
+    _heavy_affine(p=0.95),
+    _heavy_elastic(p=0.7),
+    A.GridDistortion(num_steps=5, distort_limit=0.3, p=0.5),
+    A.OpticalDistortion(distort_limit=0.1, p=0.4),
+    _coarse_dropout(p=0.4),
+    _gauss_noise(p=0.7, strong=True),
+    A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.6),
+    A.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+    ToTensorV2(),
+])
