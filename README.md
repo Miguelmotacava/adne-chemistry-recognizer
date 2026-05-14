@@ -8,43 +8,47 @@ El objetivo es construir, desde cero, un clasificador capaz de identificar compu
 
 El catálogo contiene unos 200 compuestos divididos en Química Inorgánica (óxidos, anhídridos, peróxidos, hidruros, sales, hidróxidos, oxoácidos, oxisales) y Química Orgánica (alcanos, alquenos, alquinos, cicloalcanos, aromáticos, halogenuros, alcoholes, éteres, aldehídos, cetonas, ácidos carboxílicos, ésteres, anhídridos, aminas, amidas, nitrilos).
 
-## Demo online
+## Cómo probar la app
 
-> 🚀 **Pruébala en directo:** [huggingface.co/spaces/mmmiguellll/adne-chemistry-recognizer](https://huggingface.co/spaces/mmmiguellll/adne-chemistry-recognizer)
+Hay tres formas de usar el clasificador, según cuánto quieras instalar. Ordenadas de menos a más esfuerzo:
 
-La demo está desplegada en **Hugging Face Spaces** (Gradio + 16 GB RAM gratis). No requiere instalar nada — abres el enlace y pruebas el clasificador desde cualquier navegador.
+### 🌐 1. Online en Hugging Face Spaces (sin instalar nada)
 
-### Cómo se usa
+> **URL pública:** https://huggingface.co/spaces/mmmiguellll/adne-chemistry-recognizer
 
-La demo tiene dos pestañas:
+Abres el enlace en cualquier navegador y la app está lista. La hemos desplegado en HF Spaces porque su free tier (16 GB de RAM, CPU básico) sí soporta cargar PyTorch + RDKit + el modelo de ~45 MB. Construida con **Gradio**, dos pestañas:
 
-- **Dibujar**: eliges un compuesto del catálogo (con filtros por categoría inorgánica/orgánica, subcategoría y dificultad, o pulsando *Aleatorio* / *Anterior* / *Siguiente*), ves al lado el render canónico de RDKit, lo dibujas en un canvas e imitando el render, y el modelo clasifica tu dibujo mostrando el top-5 de confianzas.
-- **Ver al modelo trabajar (modo dataset)**: pulsas *Generar imagen aleatoria* y el modelo clasifica un render de RDKit que él mismo no ha visto. Aquí la accuracy real ronda el 99% y muestra el rendimiento del modelo sobre su dominio de entrenamiento (sin la fricción del dibujo a mano).
+- **Dibujar**: eliges un compuesto del catálogo, ves al lado el render canónico de RDKit, lo replicas en un canvas y el modelo clasifica tu dibujo con top-5 de confianzas. Hay filtros por categoría inorgánica/orgánica, subcategoría y dificultad, además de botones *Anterior / Siguiente / Aleatorio*.
+- **Ver al modelo trabajar (modo dataset)**: pulsas *Generar imagen aleatoria* y el modelo clasifica un render de RDKit que él mismo no vio en entrenamiento. Aquí la accuracy real ronda el 99%.
 
-### Sobre el código del Space
+El código del Space está empaquetado en [`deployment/huggingface_space/`](deployment/huggingface_space/) y la guía paso a paso para reproducirlo en otra cuenta está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md).
 
-La carpeta [`deployment/huggingface_space/`](deployment/huggingface_space/) contiene la versión empaquetada de la app (`app.py` con Gradio, requirements.txt mínimo, modelo `.pt` y módulos auxiliares). La guía completa de despliegue está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md) por si quieres reproducirlo en otra cuenta de HF.
+### 💻 2. En local con Streamlit
 
-### Streamlit como alternativa adicional
-
-En la raíz del repo hay también [`streamlit_app.py`](streamlit_app.py), una versión Streamlit de la demo. El [`requirements.txt`](requirements.txt) principal del repo está pinned para que **Streamlit Cloud** pueda instalarlo (`torch+cpu` para que el wheel quepa en el free tier de 1 GB de RAM, sin Jupyter, DECIMER ni dependencias pesadas que no necesita la demo).
-
-Para desplegar en Streamlit Cloud:
-
-1. Entrar en https://streamlit.io/cloud
-2. *New app* → seleccionar este repositorio, branch `main`, fichero `streamlit_app.py`.
-3. Pulsar *Deploy*. La URL pública queda en `https://<algo>.streamlit.app`.
-
-Para correr la app en local:
+Versión Streamlit equivalente a la de HF Spaces, ejecutable en tu máquina. Se hace en tres líneas:
 
 ```bash
 pip install -r requirements.txt
+pip install -e .
 streamlit run streamlit_app.py
 ```
 
-Levanta la app en `http://localhost:8501`.
+Streamlit abre la app en **http://localhost:8501** y se abre el navegador automáticamente. El `requirements.txt` del repo está pinned mínimo (sin Jupyter, sin DECIMER, sin papermill) para que pese poco — exactamente lo que necesita esta app.
 
-> Si vas a trabajar también con los notebooks (`00`–`06`), usa [`requirements-dev.txt`](requirements-dev.txt) en su lugar — incluye Jupyter, DECIMER, papermill y demás dependencias de desarrollo que el deploy no necesita.
+> **Aviso sobre Streamlit Cloud:** lo intentamos primero (es lo más cómodo a priori porque hace deploy directo del repo de GitHub), pero su free tier (1 GB RAM, 1 GB disco) **no aguanta PyTorch + RDKit + el modelo**: el build acababa con `ModuleNotFoundError: torch`. Esa es la razón por la que decidimos saltar a HF Spaces.
+
+### 📓 3. En local con el notebook interactivo
+
+Para quien quiera trabajar con todo el pipeline (no sólo la demo), el [notebook 06](notebooks/06_interactive_demo.ipynb) replica la misma interfaz que la app de Streamlit/Gradio, pero dentro de Jupyter con `ipywidgets` + `ipycanvas`. Requiere las dependencias de desarrollo completas:
+
+```bash
+pip install -r requirements-dev.txt   # incluye Jupyter, DECIMER, papermill, etc.
+pip install -e .
+jupyter notebook
+# Abre notebooks/06_interactive_demo.ipynb y ejecuta todas las celdas
+```
+
+Esta vía es la que usamos para iterar durante el desarrollo y la que tiene también los notebooks 00-05 (generación, EDA, ML clásico, CNN, transfer learning, comparativa) si quieres ver el camino completo del proyecto.
 
 ## Requisitos
 
