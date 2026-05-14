@@ -62,3 +62,6 @@ api_keys.txt
 
 # Clon local del Space de Hugging Face (es un repo aparte; no debe vivir aqui)
 hf_space_repo/
+
+# Zip de respaldo de notebooks (los notebooks ya estan versionados individualmente)
+notebooks.zip
