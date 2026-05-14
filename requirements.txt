@@ -1,32 +1,24 @@
-# WARNING: RDKit cannot be installed via pip on all platforms.
-# Preferred method: conda install -c conda-forge rdkit
-# Then: pip install -r requirements.txt
-#
-# Alternative (Python 3.10+ only): pip install rdkit
-# This pip wheel may not work on all systems.
+# Dependencias minimas para desplegar la demo (streamlit_app.py) en
+# Streamlit Cloud. Sin Jupyter, sin DECIMER (arrastra TensorFlow), sin
+# papermill ni umap. Para desarrollo local con todos los notebooks usa
+# requirements-dev.txt o el entorno conda environment.yml.
 
-torch==2.1.0
-torchvision==0.16.0
-numpy==1.26.0
-pandas==2.1.1
-matplotlib==3.8.0
-seaborn==0.13.0
-scikit-learn==1.3.2
-scikit-image==0.22.0
-opencv-python==4.8.1.78
-Pillow==10.1.0
-scipy==1.11.3
-tqdm==4.66.1
-albumentations==1.3.1
-ipywidgets==8.1.1
-ipycanvas==0.13.1
-notebook==7.0.6
-jupyter==1.0.0
-decimer==2.2.0
-anthropic==0.25.0
-papermill==2.5.0
-umap-learn==0.5.4
+# torch CPU-only (en Streamlit Cloud no hay GPU). Reduce el wheel de
+# torch de ~800 MB a ~150 MB y permite encajar en el free tier de 1 GB.
+--extra-index-url https://download.pytorch.org/whl/cpu
 
-# Demo local con Streamlit (uso opcional; ver streamlit_app.py)
 streamlit>=1.34
 streamlit-drawable-canvas>=0.9.3
+
+# Modelo
+torch==2.3.1+cpu
+torchvision==0.18.1+cpu
+numpy>=1.26,<2.3
+pandas>=2.1
+Pillow>=10.1
+
+# Augmentation pipeline (VAL_TRANSFORM usado en inferencia)
+albumentations>=1.3
+
+# Render canonico de moleculas
+rdkit>=2023.9

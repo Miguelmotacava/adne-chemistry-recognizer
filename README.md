@@ -25,16 +25,26 @@ La demo tiene dos pestañas:
 
 La carpeta [`deployment/huggingface_space/`](deployment/huggingface_space/) contiene la versión empaquetada de la app (`app.py` con Gradio, requirements.txt mínimo, modelo `.pt` y módulos auxiliares). La guía completa de despliegue está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md) por si quieres reproducirlo en otra cuenta de HF.
 
-### Streamlit como alternativa local
+### Streamlit como alternativa adicional
 
-En la raíz del repo hay también [`streamlit_app.py`](streamlit_app.py), una versión Streamlit de la demo. La probamos primero para desplegar en Streamlit Cloud, pero **el plan gratuito de 1 GB de RAM no es suficiente para cargar PyTorch + RDKit + el modelo** (`ModuleNotFoundError: torch` en el log del build). Por eso pasamos a Hugging Face Spaces. La app sigue siendo plenamente funcional **en local**:
+En la raíz del repo hay también [`streamlit_app.py`](streamlit_app.py), una versión Streamlit de la demo. El [`requirements.txt`](requirements.txt) principal del repo está pinned para que **Streamlit Cloud** pueda instalarlo (`torch+cpu` para que el wheel quepa en el free tier de 1 GB de RAM, sin Jupyter, DECIMER ni dependencias pesadas que no necesita la demo).
+
+Para desplegar en Streamlit Cloud:
+
+1. Entrar en https://streamlit.io/cloud
+2. *New app* → seleccionar este repositorio, branch `main`, fichero `streamlit_app.py`.
+3. Pulsar *Deploy*. La URL pública queda en `https://<algo>.streamlit.app`.
+
+Para correr la app en local:
 
 ```bash
 pip install -r requirements.txt
 streamlit run streamlit_app.py
 ```
 
-Eso levanta la app en `http://localhost:8501`.
+Levanta la app en `http://localhost:8501`.
+
+> Si vas a trabajar también con los notebooks (`00`–`06`), usa [`requirements-dev.txt`](requirements-dev.txt) en su lugar — incluye Jupyter, DECIMER, papermill y demás dependencias de desarrollo que el deploy no necesita.
 
 ## Requisitos
 
