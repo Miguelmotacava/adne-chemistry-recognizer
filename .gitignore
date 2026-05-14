@@ -35,6 +35,9 @@ data/metadata.csv
 !saved_models/best_model_handwritten.pt
 !saved_models/chemcnn_best.pt
 !saved_models/cvae_best.pt
+# Copia del modelo en la carpeta de despliegue de HF Space (necesario para
+# que el Space funcione cuando se sube como repo independiente)
+!deployment/huggingface_space/*.pt
 
 # IDE
 .vscode/

@@ -1,0 +1,28 @@
+# WARNING: RDKit cannot be installed via pip on all platforms.
+# Preferred method: conda install -c conda-forge rdkit
+# Then: pip install -r requirements.txt
+#
+# Alternative (Python 3.10+ only): pip install rdkit
+# This pip wheel may not work on all systems.
+
+torch==2.1.0
+torchvision==0.16.0
+numpy==1.26.0
+pandas==2.1.1
+matplotlib==3.8.0
+seaborn==0.13.0
+scikit-learn==1.3.2
+scikit-image==0.22.0
+opencv-python==4.8.1.78
+Pillow==10.1.0
+scipy==1.11.3
+tqdm==4.66.1
+albumentations==1.3.1
+ipywidgets==8.1.1
+ipycanvas==0.13.1
+notebook==7.0.6
+jupyter==1.0.0
+decimer==2.2.0
+anthropic==0.25.0
+papermill==2.5.0
+umap-learn==0.5.4

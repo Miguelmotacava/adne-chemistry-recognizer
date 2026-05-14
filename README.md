@@ -8,6 +8,29 @@ El objetivo es construir, desde cero, un clasificador capaz de identificar compu
 
 El catálogo contiene unos 200 compuestos divididos en Química Inorgánica (óxidos, anhídridos, peróxidos, hidruros, sales, hidróxidos, oxoácidos, oxisales) y Química Orgánica (alcanos, alquenos, alquinos, cicloalcanos, aromáticos, halogenuros, alcoholes, éteres, aldehídos, cetonas, ácidos carboxílicos, ésteres, anhídridos, aminas, amidas, nitrilos).
 
+## Demo online
+
+La demo del clasificador está preparada para desplegarse gratuitamente en dos plataformas, así puedes elegir la que más te convenga:
+
+### Opción A — Streamlit Cloud (la más sencilla)
+
+[`streamlit_app.py`](streamlit_app.py) en la raíz del repo es la versión Streamlit de la demo. Para desplegarla:
+
+1. Ir a https://streamlit.io/cloud, registrarse con la cuenta de GitHub.
+2. *New app* → seleccionar el repositorio `adne-chemistry-recognizer`, branch `main`, fichero `streamlit_app.py`.
+3. Pulsar *Deploy*. Streamlit Cloud instala las dependencias de `requirements.txt` (que están pinned para esto) y arranca la app en una URL pública del estilo `https://adne-chemistry-recognizer.streamlit.app`.
+
+Para probarla en local: `pip install -r requirements.txt && streamlit run streamlit_app.py`.
+
+### Opción B — Hugging Face Spaces con Gradio
+
+La carpeta [`deployment/huggingface_space/`](deployment/huggingface_space/) contiene una versión Gradio empaquetada para HF Spaces. Es preferible si te interesa más RAM gratuita (16 GB vs 1 GB de Streamlit Cloud) y la posibilidad de GPU temporal. La guía paso a paso está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md).
+
+### Qué ofrecen las dos demos
+
+- **Modo dibujo**: el usuario elige un compuesto, ve un render de referencia de RDKit y dibuja en un canvas. El modelo clasifica el dibujo y muestra el top-5.
+- **Modo dataset**: el modelo recibe un render aleatorio de RDKit del dataset y lo clasifica. Sirve para mostrar el rendimiento real del modelo (~99%) sin depender de la habilidad del dibujante.
+
 ## Requisitos
 
 - Windows 10/11, macOS 12+ o Ubuntu 20.04+
@@ -86,7 +109,9 @@ chemistry-recognizer/
 ├── tests/                    # pytest — compounds, models, dataset
 ├── scripts/                  # setup_env, generate_full_dataset, run_all_notebooks
 ├── environment.yml
-├── requirements.txt
+├── requirements.txt          # deps minimas para la demo en Streamlit Cloud
+├── requirements-dev.txt      # deps completas para el desarrollo (notebooks)
+├── streamlit_app.py          # demo desplegable
 ├── setup.py
 └── Makefile
 ```
@@ -254,12 +279,42 @@ Si no está definida, el notebook 05 omite la fila del LLM sin fallar.
 - **Dataset en disco vs. on-the-fly**: hemos optado por escribir las variantes aumentadas a disco. Es menos elegante pero ahorra ~30% de tiempo por época (la augmentación con `ElasticTransform` no es gratis).
 - **`WeightedRandomSampler`** activado por defecto en `get_dataloaders()`. Con el dataset balanceado actual es redundante, pero queda como red de seguridad si en el futuro alguien filtra por subcategoría o dificultad.
 
-## Sin conda
+## Demo desplegada en la nube
 
-Si no quieres instalar conda:
+La demo del notebook 06 está disponible como aplicación web standalone en `streamlit_app.py` (en la raíz del repo). Se puede desplegar gratis en Streamlit Cloud o en Hugging Face Spaces siguiendo estos pasos:
+
+### Streamlit Cloud (lo más sencillo)
+
+1. Crear cuenta en [share.streamlit.io](https://share.streamlit.io) (basta con login de GitHub).
+2. *New app* → seleccionar el repo `Miguelmotacava/adne-chemistry-recognizer`, branch `main`, main file `streamlit_app.py`.
+3. *Deploy*. En unos 3–5 minutos la app está online en una URL pública del tipo `https://adne-chemistry-recognizer.streamlit.app`.
+
+Streamlit Cloud usa por defecto `requirements.txt` (que ya viene preparado con las dependencias mínimas — sin Jupyter, sin DECIMER/TensorFlow). El despliegue tarda menos de cinco minutos.
+
+### Hugging Face Spaces (alternativa, idéntico de fácil)
+
+1. Crear cuenta en [huggingface.co](https://huggingface.co).
+2. *New Space* → SDK: **Streamlit**.
+3. Clonar el space recién creado, copiar `streamlit_app.py`, `requirements.txt`, `src/`, `data/compounds.py`, `data/generate_dataset.py` y `saved_models/`. Push.
+
+### Probar la demo en local
 
 ```bash
 python -m pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+Abre en el navegador `http://localhost:8501`. La app tiene dos pestañas:
+
+- **Test del modelo (RDKit)**: elige un compuesto y mira cómo lo clasifica. Aquí la accuracy es la real del modelo (~99%).
+- **Dibujar a mano**: lienzo para dibujar el compuesto + render de referencia al lado. Como advertimos en la sección de limitaciones, la accuracy aquí es notablemente inferior.
+
+## Sin conda
+
+Si no quieres instalar conda, para **desarrollar localmente** (notebooks incluidos) usa el archivo completo de dependencias:
+
+```bash
+python -m pip install -r requirements-dev.txt
 # Y aparte:
 python -m pip install rdkit          # puede que no haya wheel para tu plataforma
 ```
