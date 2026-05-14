@@ -206,7 +206,13 @@ El dataset tiene dos modos de render:
 | Inorgánica | óxidos metálicos, anhídridos, peróxidos, hidruros metálicos, hidruros volátiles, oxoácidos | hidrácidos, sales neutras, sales volátiles, hidróxidos, oxisales |
 | Orgánica | **todas** (siempre estructuras 2D) | — |
 
+<img width="840" height="353" alt="image" src="https://github.com/user-attachments/assets/69c5eaf0-8635-4fa7-905e-23d14d989510" />
+
 Para una sesión de demo realista, recomendamos filtrar a *Orgánica* o a las subcategorías inorgánicas de la columna izquierda. El propio notebook muestra un aviso visible si el compuesto actual es de los iónicos.
+
+<img width="497" height="470" alt="image" src="https://github.com/user-attachments/assets/a289bf21-fbc1-4c9c-ad05-3a6dee14af34" />
+
+Como se puede observar, no predice nada bien. Un entrenamiento más exhaustivo sería necesario y también quizás ampliar la muestra y utilizar mejores métodos de reconocimiento.
 
 ### Cómo se arreglaría de raíz
 
