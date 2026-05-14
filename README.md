@@ -206,9 +206,13 @@ El dataset tiene dos modos de render:
 | Inorgánica | óxidos metálicos, anhídridos, peróxidos, hidruros metálicos, hidruros volátiles, oxoácidos | hidrácidos, sales neutras, sales volátiles, hidróxidos, oxisales |
 | Orgánica | **todas** (siempre estructuras 2D) | — |
 
+A continuación se muestra la interfaz de la demo:
+
 <img width="840" height="353" alt="image" src="https://github.com/user-attachments/assets/69c5eaf0-8635-4fa7-905e-23d14d989510" />
 
 Para una sesión de demo realista, recomendamos filtrar a *Orgánica* o a las subcategorías inorgánicas de la columna izquierda. El propio notebook muestra un aviso visible si el compuesto actual es de los iónicos.
+
+Ahora se muestra un muestra de prueba (falla de manera muy notable):
 
 <img width="497" height="470" alt="image" src="https://github.com/user-attachments/assets/a289bf21-fbc1-4c9c-ad05-3a6dee14af34" />
 
@@ -284,6 +288,7 @@ python -m pytest tests/ -v
 
 Trabajo realizado por el siguiente grupo del Máster en Big Data, ICAI – Universidad Pontificia Comillas, curso 2025-2026:
 
-- Miguel Mota Cava
 - Pedro Rodríguez
 - Juan Miguel Correa
+- Miguel Mota
+  
