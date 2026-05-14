@@ -156,21 +156,46 @@ with tab_test:
         'Aqui la accuracy es la real del modelo (~99%).'
     )
 
-    cols = st.columns([2, 1])
+    # Callbacks para los botones — se ejecutan ANTES del re-render, evitando
+    # el error tipico "session_state.X cannot be modified after the widget X
+    # has been instantiated" que aparecia al usar st.rerun() ingenuamente.
+    _ALL_IDS = sorted(c['id'] for c in COMPOUNDS)
+
+    def _test_random():
+        current = st.session_state.get('test_compound_select')
+        choices = [i for i in _ALL_IDS if i != current] or _ALL_IDS
+        st.session_state['test_compound_select'] = random.choice(choices)
+
+    def _test_prev():
+        current = st.session_state.get('test_compound_select', _ALL_IDS[0])
+        i = _ALL_IDS.index(current) if current in _ALL_IDS else 0
+        st.session_state['test_compound_select'] = _ALL_IDS[(i - 1) % len(_ALL_IDS)]
+
+    def _test_next():
+        current = st.session_state.get('test_compound_select', _ALL_IDS[0])
+        i = _ALL_IDS.index(current) if current in _ALL_IDS else 0
+        st.session_state['test_compound_select'] = _ALL_IDS[(i + 1) % len(_ALL_IDS)]
+
+    cols = st.columns([3, 1, 1, 1])
     with cols[0]:
         compound_id = st.selectbox(
             'Compuesto',
-            options=sorted(c['id'] for c in COMPOUNDS),
+            options=_ALL_IDS,
             format_func=lambda cid: f"{cid} — {COMPOUND_BY_ID[cid]['name_display']}",
             key='test_compound_select',
         )
     with cols[1]:
         st.write('')
+        st.button('◀ Anterior', on_click=_test_prev,
+                  use_container_width=True, key='test_prev_btn')
+    with cols[2]:
         st.write('')
-        if st.button('🎲 Sorprendeme', use_container_width=True):
-            st.session_state['test_compound_select'] = random.choice(
-                [c['id'] for c in COMPOUNDS])
-            st.rerun()
+        st.button('Siguiente ▶', on_click=_test_next,
+                  use_container_width=True, key='test_next_btn')
+    with cols[3]:
+        st.write('')
+        st.button('🎲 Aleatorio', on_click=_test_random,
+                  use_container_width=True, key='test_random_btn')
 
     c = COMPOUND_BY_ID[compound_id]
     try:
@@ -224,21 +249,41 @@ with tab_draw:
         st.warning('`streamlit-drawable-canvas` no esta instalado. '
                    'Anadelo a requirements.txt para activar el lienzo de dibujo.')
 
-    cols = st.columns([2, 1])
+    def _draw_random():
+        current = st.session_state.get('draw_compound_select')
+        choices = [i for i in _ALL_IDS if i != current] or _ALL_IDS
+        st.session_state['draw_compound_select'] = random.choice(choices)
+
+    def _draw_prev():
+        current = st.session_state.get('draw_compound_select', _ALL_IDS[0])
+        i = _ALL_IDS.index(current) if current in _ALL_IDS else 0
+        st.session_state['draw_compound_select'] = _ALL_IDS[(i - 1) % len(_ALL_IDS)]
+
+    def _draw_next():
+        current = st.session_state.get('draw_compound_select', _ALL_IDS[0])
+        i = _ALL_IDS.index(current) if current in _ALL_IDS else 0
+        st.session_state['draw_compound_select'] = _ALL_IDS[(i + 1) % len(_ALL_IDS)]
+
+    cols = st.columns([3, 1, 1, 1])
     with cols[0]:
         target_id = st.selectbox(
             'Compuesto a dibujar',
-            options=sorted(c['id'] for c in COMPOUNDS),
+            options=_ALL_IDS,
             format_func=lambda cid: f"{cid} — {COMPOUND_BY_ID[cid]['name_display']}",
             key='draw_compound_select',
         )
     with cols[1]:
         st.write('')
+        st.button('◀ Anterior', on_click=_draw_prev,
+                  use_container_width=True, key='draw_prev_btn')
+    with cols[2]:
         st.write('')
-        if st.button('🎲 Aleatorio', key='draw_random', use_container_width=True):
-            st.session_state['draw_compound_select'] = random.choice(
-                [c['id'] for c in COMPOUNDS])
-            st.rerun()
+        st.button('Siguiente ▶', on_click=_draw_next,
+                  use_container_width=True, key='draw_next_btn')
+    with cols[3]:
+        st.write('')
+        st.button('🎲 Aleatorio', on_click=_draw_random,
+                  use_container_width=True, key='draw_random_btn')
 
     target = COMPOUND_BY_ID[target_id]
 
