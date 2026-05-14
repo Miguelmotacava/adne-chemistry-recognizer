@@ -10,26 +10,31 @@ El catálogo contiene unos 200 compuestos divididos en Química Inorgánica (óx
 
 ## Demo online
 
-La demo del clasificador está preparada para desplegarse gratuitamente en dos plataformas, así puedes elegir la que más te convenga:
+> 🚀 **Pruébala en directo:** [huggingface.co/spaces/mmmiguellll/adne-chemistry-recognizer](https://huggingface.co/spaces/mmmiguellll/adne-chemistry-recognizer)
 
-### Opción A — Streamlit Cloud (la más sencilla)
+La demo está desplegada en **Hugging Face Spaces** (Gradio + 16 GB RAM gratis). No requiere instalar nada — abres el enlace y pruebas el clasificador desde cualquier navegador.
 
-[`streamlit_app.py`](streamlit_app.py) en la raíz del repo es la versión Streamlit de la demo. Para desplegarla:
+### Cómo se usa
 
-1. Ir a https://streamlit.io/cloud, registrarse con la cuenta de GitHub.
-2. *New app* → seleccionar el repositorio `adne-chemistry-recognizer`, branch `main`, fichero `streamlit_app.py`.
-3. Pulsar *Deploy*. Streamlit Cloud instala las dependencias de `requirements.txt` (que están pinned para esto) y arranca la app en una URL pública del estilo `https://adne-chemistry-recognizer.streamlit.app`.
+La demo tiene dos pestañas:
 
-Para probarla en local: `pip install -r requirements.txt && streamlit run streamlit_app.py`.
+- **Dibujar**: eliges un compuesto del catálogo (con filtros por categoría inorgánica/orgánica, subcategoría y dificultad, o pulsando *Aleatorio* / *Anterior* / *Siguiente*), ves al lado el render canónico de RDKit, lo dibujas en un canvas e imitando el render, y el modelo clasifica tu dibujo mostrando el top-5 de confianzas.
+- **Ver al modelo trabajar (modo dataset)**: pulsas *Generar imagen aleatoria* y el modelo clasifica un render de RDKit que él mismo no ha visto. Aquí la accuracy real ronda el 99% y muestra el rendimiento del modelo sobre su dominio de entrenamiento (sin la fricción del dibujo a mano).
 
-### Opción B — Hugging Face Spaces con Gradio
+### Sobre el código del Space
 
-La carpeta [`deployment/huggingface_space/`](deployment/huggingface_space/) contiene una versión Gradio empaquetada para HF Spaces. Es preferible si te interesa más RAM gratuita (16 GB vs 1 GB de Streamlit Cloud) y la posibilidad de GPU temporal. La guía paso a paso está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md).
+La carpeta [`deployment/huggingface_space/`](deployment/huggingface_space/) contiene la versión empaquetada de la app (`app.py` con Gradio, requirements.txt mínimo, modelo `.pt` y módulos auxiliares). La guía completa de despliegue está en [`deployment/huggingface_space/DEPLOY.md`](deployment/huggingface_space/DEPLOY.md) por si quieres reproducirlo en otra cuenta de HF.
 
-### Qué ofrecen las dos demos
+### Streamlit como alternativa local
 
-- **Modo dibujo**: el usuario elige un compuesto, ve un render de referencia de RDKit y dibuja en un canvas. El modelo clasifica el dibujo y muestra el top-5.
-- **Modo dataset**: el modelo recibe un render aleatorio de RDKit del dataset y lo clasifica. Sirve para mostrar el rendimiento real del modelo (~99%) sin depender de la habilidad del dibujante.
+En la raíz del repo hay también [`streamlit_app.py`](streamlit_app.py), una versión Streamlit de la demo. La probamos primero para desplegar en Streamlit Cloud, pero **el plan gratuito de 1 GB de RAM no es suficiente para cargar PyTorch + RDKit + el modelo** (`ModuleNotFoundError: torch` en el log del build). Por eso pasamos a Hugging Face Spaces. La app sigue siendo plenamente funcional **en local**:
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+Eso levanta la app en `http://localhost:8501`.
 
 ## Requisitos
 

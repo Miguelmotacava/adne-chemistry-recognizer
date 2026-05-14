@@ -59,3 +59,6 @@ temp/
 .env.local
 *.key
 api_keys.txt
+
+# Clon local del Space de Hugging Face (es un repo aparte; no debe vivir aqui)
+hf_space_repo/

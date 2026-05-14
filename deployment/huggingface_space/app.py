@@ -109,6 +109,44 @@ def get_reference_image(compound_id: str) -> Image.Image | None:
         return None
 
 
+# --- UI: filtros (categoria / subcategoria / dificultad) ------------------- #
+
+CATEGORIES = [('Ambas', None), ('Inorgánica', 'inorganica'), ('Orgánica', 'organica')]
+DIFFICULTIES = [('Todas', None), ('Básico', 'basico'),
+                ('Intermedio', 'intermedio'), ('Avanzado', 'avanzado')]
+
+
+def _subcategories_for(category_value):
+    """Devuelve la lista de (display, slug) de subcategorias dada la categoria."""
+    cats = [category_value] if category_value else ['inorganica', 'organica']
+    pairs = []
+    for c in cats:
+        if c in TAXONOMY:
+            for slug, data in TAXONOMY[c]['subcategories'].items():
+                pairs.append((data['display'], slug))
+    return pairs
+
+
+def filter_pool(category_value, subcat_slugs, difficulty_value, current_compound):
+    """Aplica los filtros al catalogo y devuelve la nueva lista de ids."""
+    pool = get_compounds(
+        category=category_value,
+        subcategories=list(subcat_slugs) if subcat_slugs else None,
+        difficulty=difficulty_value,
+    )
+    ids = [c['id'] for c in pool]
+    if not ids:
+        ids = ALL_IDS[:]  # fallback: no romper la UI
+    new_current = current_compound if current_compound in ids else ids[0]
+    return gr.Dropdown(choices=ids, value=new_current)
+
+
+def refresh_subcategories(category_value):
+    """Reconstruye el CheckboxGroup cuando cambia la categoria."""
+    options = _subcategories_for(category_value)
+    return gr.CheckboxGroup(choices=options, value=[])
+
+
 # --- UI: modo dibujo libre -------------------------------------------------- #
 
 def on_compound_change(compound_id: str):
@@ -193,11 +231,27 @@ with gr.Blocks(title='Reconocedor de estructuras químicas') as demo:
     """)
 
     with gr.Tab('Dibujar'):
+        with gr.Accordion('Filtros del catálogo (categoría, subcategoría, dificultad)', open=False):
+            with gr.Row():
+                category_radio = gr.Radio(
+                    choices=CATEGORIES, value=None,
+                    label='Categoría')
+                difficulty_radio = gr.Radio(
+                    choices=DIFFICULTIES, value=None,
+                    label='Dificultad')
+            subcat_check = gr.CheckboxGroup(
+                choices=_subcategories_for(None),
+                value=[],
+                label='Subcategorías (vacío = todas las de la categoría elegida)')
         with gr.Row():
             with gr.Column(scale=2):
                 compound_dropdown = gr.Dropdown(
                     choices=ALL_IDS, label='Compuesto a dibujar',
                     value='metano', interactive=True)
+                with gr.Row():
+                    btn_prev = gr.Button('◀ Anterior')
+                    btn_next = gr.Button('Siguiente ▶')
+                    btn_random = gr.Button('🎲 Aleatorio', variant='secondary')
                 compound_label = gr.Markdown('')
                 warning_md = gr.Markdown('')
                 sketch = gr.Sketchpad(
@@ -224,6 +278,48 @@ with gr.Blocks(title='Reconocedor de estructuras químicas') as demo:
         btn_check.click(
             fn=classify_drawing, inputs=[sketch, compound_dropdown],
             outputs=[processed_view, top5_label, result_md])
+
+        # Navegacion por el catalogo: anterior, siguiente, aleatorio.
+        # Cada uno actualiza el valor del dropdown y eso dispara on_compound_change.
+        def _go_prev(current):
+            try:
+                i = ALL_IDS.index(current)
+            except ValueError:
+                i = 0
+            return ALL_IDS[(i - 1) % len(ALL_IDS)]
+
+        def _go_next(current):
+            try:
+                i = ALL_IDS.index(current)
+            except ValueError:
+                i = 0
+            return ALL_IDS[(i + 1) % len(ALL_IDS)]
+
+        def _go_random(current):
+            options = [c for c in ALL_IDS if c != current]
+            return random.choice(options) if options else current
+
+        btn_prev.click(fn=_go_prev, inputs=compound_dropdown, outputs=compound_dropdown)
+        btn_next.click(fn=_go_next, inputs=compound_dropdown, outputs=compound_dropdown)
+        btn_random.click(fn=_go_random, inputs=compound_dropdown, outputs=compound_dropdown)
+
+        # Filtros: al cambiar categoria se refresca el CheckboxGroup de subcategorias
+        # y se aplica el filtro al dropdown. Al cambiar subcat o dificultad,
+        # tambien se aplica el filtro.
+        category_radio.change(
+            fn=refresh_subcategories, inputs=category_radio, outputs=subcat_check)
+        category_radio.change(
+            fn=filter_pool,
+            inputs=[category_radio, subcat_check, difficulty_radio, compound_dropdown],
+            outputs=compound_dropdown)
+        subcat_check.change(
+            fn=filter_pool,
+            inputs=[category_radio, subcat_check, difficulty_radio, compound_dropdown],
+            outputs=compound_dropdown)
+        difficulty_radio.change(
+            fn=filter_pool,
+            inputs=[category_radio, subcat_check, difficulty_radio, compound_dropdown],
+            outputs=compound_dropdown)
 
     with gr.Tab('Ver al modelo trabajar (modo dataset)'):
         gr.Markdown("""Pulsa **Generar imagen aleatoria** para que aparezca un render de RDKit
